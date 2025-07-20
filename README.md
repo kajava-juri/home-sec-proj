@@ -104,7 +104,7 @@ follow these guides:
 * https://medium.com/@munteanu210/what-is-a-ca-bundle-and-where-to-find-it-32eff5ef446b
 * https://www.ssldragon.com/blog/what-is-a-ca-bundle/?utm_source=medium-com&utm_medium=referral&utm_campaign=syndication#get-ca-bundle
 
-## Step 4: Configure Mosquitto
+## Step 5: Configure Mosquitto
 
 ```bash
 # Backup original config
@@ -139,7 +139,7 @@ require_certificate true
 EOF
 ```
 
-## Step 5: Restart and Test
+## Step 6: Restart and Test
 
 ```bash
 # Restart Mosquitto service
