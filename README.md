@@ -11,7 +11,7 @@ go get github.com/eclipse/paho.mqtt.golang
 
 2. Create a `.env` file in the `backend` directory with the following content:
 ```env
-MQTT_BROKER=tcp://localhost:1883
+MQTT_BROKER=mqtts://localhost:8883
 MQTT_CLIENT_ID=home-security-backend
 MQTT_USERNAME=
 MQTT_PASSWORD=
@@ -94,6 +94,15 @@ sudo chmod 644 /etc/mosquitto/certs/*.csr
 sudo chmod 644 /etc/mosquitto/certs/*.crt
 sudo chmod 600 /etc/mosquitto/certs/*.key
 ```
+
+## Step 4: Create a .pem file for the go application (also called a bundle) where you concatenate the public certificates in the following order
+1. server.crt
+2. ca.crt
+   
+_if you have a chained certificate then it should also include them starting from the last in the chain to the first (eg. 3, 2, 1, ca)_
+follow these guides:
+* https://medium.com/@munteanu210/what-is-a-ca-bundle-and-where-to-find-it-32eff5ef446b
+* https://www.ssldragon.com/blog/what-is-a-ca-bundle/?utm_source=medium-com&utm_medium=referral&utm_campaign=syndication#get-ca-bundle
 
 ## Step 4: Configure Mosquitto
 
