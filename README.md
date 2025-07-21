@@ -2,11 +2,21 @@
 It will serve a REST API and handle MQTT messages that the sensors will send.
 This repository also contains a simulator that sends fake data via MQTT.
 
+## Initial Setup
+1. Clone the repository:
+```bash
+git clone TODO: Add repository URL
+```
+2. Copy the example environment file:
+```bash
+cp default/.env.example backend/.env
+```
+
+
 ## Running the simulator
 1. Install dependencies:
 ```bash
-go get github.com/joho/godotenv
-go get github.com/eclipse/paho.mqtt.golang
+go mod tidy
 ```
 
 2. Create a `.env` file in the `backend` directory with the following content:
@@ -21,6 +31,26 @@ MQTT_PASSWORD=
 ```bash
 python sensor_simulator.py --host raspberrypi.local --port 8883 --ca_cert ../certs/ca.crt --cert ../certs/client.crt --key ../certs/client.key
 ```
+
+## MQTT broker setup and TLS configuration
+This section provides instructions for setting up a Mosquitto MQTT broker with TLS encryption.
+
+## Prerequisites
+- A Linux-based system (e.g., Raspberry Pi OS, Ubuntu)
+- Mosquitto MQTT broker installed
+- OpenSSL installed for certificate generation
+
+I followed this guide from Medium: [[Tutorial] How to Set Up a Mosquitto MQTT Broker Securely— Using Client Certificates](https://medium.com/gravio-edge-iot-platform/how-to-set-up-a-mosquitto-mqtt-broker-securely-using-client-certificates-82b2aaaef9c8)
+
+## Database
+This project uses PostgreSQL as the database. Ensure you have PostgreSQL installed and running.
+
+## Install migration tool
+```bash
+go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+```
+## Create the database
+...
 
 ## Certificates
 

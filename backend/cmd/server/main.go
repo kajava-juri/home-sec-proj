@@ -1,6 +1,7 @@
 package main
 
 import (
+	postgres "backend/database"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -31,6 +32,12 @@ func main() {
     }
 
     tlsconfig := NewTLSConfig()
+    db, err := postgres.NewDb("postgres://user:password@localhost:5432/mydb")
+    if err != nil {
+        log.Fatalf("Failed to connect to database: %v", err)
+    }
+    defer db.Close()
+    //queries := postgres.New(db)
 
     // Get environment variables with defaults
     broker := getEnv("MQTT_BROKER", "mqtt://localhost:1883")
@@ -122,4 +129,11 @@ func getEnv(key, defaultValue string) string {
         return value
     }
     return defaultValue
+}
+
+func createMessageHandler(queries *postgres.Queries) mqtt.MessageHandler {
+    return func(client mqtt.Client, msg mqtt.Message) {
+        fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
+        
+    }
 }
