@@ -13,7 +13,7 @@ cp default/.env.example backend/.env
 ```
 
 
-## Running the simulator
+## Running the backend
 1. Install dependencies:
 ```bash
 go mod tidy
@@ -27,7 +27,26 @@ MQTT_USERNAME=
 MQTT_PASSWORD=
 ```
 
-3. Run the simulator:
+3. Start the backend server:
+```bash
+cd backend
+go run cmd/server/main.go
+```
+
+## Running the simulator:
+
+This simulator sends fake sensor data to the MQTT broker. It can be used to test the backend without real sensors.
+Navigate to the `sensor_simulator` directory:
+```bash
+cd sensor_simulator
+```
+
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. 
 ```bash
 python sensor_simulator.py --host raspberrypi.local --port 8883 --ca_cert ../certs/ca.crt --cert ../certs/client.crt --key ../certs/client.key
 ```

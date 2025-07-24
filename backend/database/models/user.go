@@ -1,10 +1,11 @@
 package models
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type User struct {
-    ID        int       `json:"id" db:"id"`
+    gorm.Model
     Username  string    `json:"username" db:"username"`
     Password  string    `json:"-" db:"password"`          // Don't expose in JSON
-    CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
