@@ -5,6 +5,7 @@ import (
 	"backend/database/models"
 	"backend/database/services"
 	"backend/pkg/utils"
+	"backend/pkg/websockets"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -35,6 +36,9 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
+	// Initialize Websocket
+	wsHub := websockets.StartWebsocketServer()
+
 	// Get environment variables with defaults
 	broker := utils.GetEnv("MQTT_BROKER", "mqtt://localhost:1883")
 	clientID := utils.GetEnv("MQTT_CLIENT_ID", "home-security-backend")
@@ -57,7 +61,7 @@ func main() {
 	}
 
 	opts.SetAutoReconnect(true)
-	opts.SetDefaultPublishHandler(createMessageHandler())
+	opts.SetDefaultPublishHandler(createMessageHandler(wsHub))
 	opts.OnConnect = connectHandler
 	opts.OnConnectionLost = connectLostHandler
 
@@ -117,7 +121,7 @@ func NewTLSConfig() *tls.Config {
 	}
 }
 
-func createMessageHandler() mqtt.MessageHandler {
+func createMessageHandler(wsHub *websockets.WsHub) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		topic := msg.Topic()
 		payload := msg.Payload()
@@ -148,7 +152,13 @@ func createMessageHandler() mqtt.MessageHandler {
 				MessageTimestamp: time.Unix(int64(messageTimestamp), 0),
 			}
 
-			services.SensorReading.Create(reading)
+			if err := services.SensorReading.Create(reading); err != nil {
+				log.Printf("Failed to create sensor reading: %v\n", err)
+				return
+			}
+
+			wsHub.BroadcastMessage([]byte(reading.Message))
+
 		}
 	}
 }

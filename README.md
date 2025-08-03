@@ -83,7 +83,6 @@ mkdir ~/certs
 cd ~/certs
 
 ### Create an extensions config file for x509 that will include the alternative names
-``` bash
 sudo nano extensions.cnf
 ```
 
