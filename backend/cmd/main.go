@@ -4,26 +4,24 @@ import (
 	postgres "backend/database"
 	"backend/database/models"
 	"backend/database/services"
+	"backend/pkg/utils"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"strings"
 	"time"
 
-	"backend/pkg/utils"
-
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-	fmt.Println("Connected")
+	log.Println("Connected")
 }
 
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
-	fmt.Printf("Connect lost: %v", err)
+	log.Printf("Connect lost: %v", err)
 }
 
 func main() {
@@ -43,8 +41,8 @@ func main() {
 	username := utils.GetEnv("MQTT_USERNAME", "")
 	password := utils.GetEnv("MQTT_PASSWORD", "")
 
-	fmt.Printf("Connecting to MQTT broker: %s\n", broker)
-	fmt.Printf("Client ID: %s\n", clientID)
+	log.Printf("Connecting to MQTT broker: %s\n", broker)
+	log.Printf("Client ID: %s\n", clientID)
 
 	// Configure MQTT client options
 	opts := mqtt.NewClientOptions()
@@ -73,7 +71,7 @@ func main() {
 	topic := "sensor/#"
 	token := client.Subscribe(topic, 1, nil)
 	token.Wait()
-	fmt.Printf("Subscribed to topic: %s\n", topic)
+	log.Printf("Subscribed to topic: %s\n", topic)
 
 	// Keep the program running
 	select {}
@@ -100,7 +98,6 @@ func NewTLSConfig() *tls.Config {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(cert.Leaf)
 
 	// Create tls.Config with desired tls properties
 	return &tls.Config{
@@ -124,19 +121,19 @@ func createMessageHandler() mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		topic := msg.Topic()
 		payload := msg.Payload()
-		fmt.Printf("Received message: %s from topic: %s\n", payload, topic)
+		log.Printf("Received message: %s from topic: %s\n", payload, topic)
 
 		if strings.HasPrefix(topic, "sensor/") && len(strings.Split(topic, "/")) >= 3 {
 			parts := strings.Split(topic, "/")
 			if len(parts) < 3 {
-				fmt.Println("Invalid topic format: " + topic)
+				log.Println("Invalid topic format: " + topic)
 				return
 			}
 			sensorId := parts[1]
 
 			var dat map[string]interface{}
 			if err := json.Unmarshal(payload, &dat); err != nil {
-				fmt.Printf("Error unmarshalling JSON: %v\n", err)
+				log.Printf("Error unmarshalling JSON: %v\n", err)
 				return
 			}
 			// Get message timestamp
