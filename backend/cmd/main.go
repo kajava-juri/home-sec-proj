@@ -72,7 +72,8 @@ func main() {
 	client := mqtt.NewClient(opts)
 	if token := client.Connect(); token.WaitTimeout(5 * time.Second) {
 		if token.Error() != nil {
-			log.Fatalf("Failed to connect to MQTT broker: %v", token.Error())
+			log.Printf("Failed to connect to MQTT broker: %v", token.Error())
+			log.Println("Application will continue running without MQTT connectivity")
 		} else {
 			log.Println("Connected to MQTT broker")
 			// Subscribe to sensor topics
@@ -83,6 +84,7 @@ func main() {
 		}
 	} else {
 		log.Printf("Failed to connect to MQTT broker: timed out")
+		log.Println("Application will continue running without MQTT connectivity")
 	}
 
 	// Keep the program running
