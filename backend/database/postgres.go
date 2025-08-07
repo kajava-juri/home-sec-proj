@@ -19,7 +19,7 @@ var db_name = utils.GetEnvOrPanic("DB_NAME")
 
 // var db_user = utils.GetEnvOrPanic("DB_USER")
 // var db_user_password = utils.GetEnvOrPanic("DB_USER_PASSWORD")
-var db_postgres_password = utils.GetEnv("DB_POSTGRES_PASSWORD")
+var db_postgres_password = utils.GetEnv("DB_POSTGRES_PASSWORD", "")
 var db_host = utils.GetEnvOrPanic("DB_HOST")
 var db_port = utils.GetEnvOrPanic("DB_PORT")
 
