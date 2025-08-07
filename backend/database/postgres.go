@@ -32,43 +32,41 @@ type Queries struct {
 func createDatabaseIfNotExists() error {
 	// Connect to default postgres database to create our app database
 	postgresURL := fmt.Sprintf("host=%s user=postgres password=%s dbname=postgres port=%s sslmode=disable",
-		utils.GetEnvOrPanic("DB_HOST"),
-		utils.GetEnvOrPanic("DB_POSTGRES_PASSWORD"),
-		utils.GetEnvOrPanic("DB_PORT"))
+		db_host,
+		db_postgres_password,
+		db_port)
 
 	db, err := gorm.Open(postgres.Open(postgresURL), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to connect to postgres database: %w", err)
 	}
 
-	dbName := utils.GetEnvOrPanic("DB_NAME")
-
 	// Check if database exists first
 	var exists bool
-	checkQuery := fmt.Sprintf("SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = '%s')", dbName)
+	checkQuery := fmt.Sprintf("SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = '%s')", db_name)
 	result := db.Raw(checkQuery).Scan(&exists)
 	if result.Error != nil {
 		return fmt.Errorf("failed to check if database exists: %w", result.Error)
 	}
 
 	if exists {
-		log.Printf("Database %s already exists\n", dbName)
+		log.Printf("Database %s already exists\n", db_name)
 		return nil
 	}
 
 	// Create database if it doesn't exist
-	createResult := db.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
+	createResult := db.Exec(fmt.Sprintf("CREATE DATABASE %s", db_name))
 	if createResult.Error != nil {
 		// Check if error is "permission denied" - warn but continue
 		if strings.Contains(createResult.Error.Error(), "permission denied") {
-			fmt.Printf("Warning: Cannot create database %s (permission denied). Please create it manually:\n", dbName)
-			fmt.Printf("  psql -U postgres -c \"CREATE DATABASE %s OWNER %s;\"\n", dbName, utils.GetEnvOrPanic("DB_USER"))
+			fmt.Printf("Warning: Cannot create database %s (permission denied). Please create it manually:\n", db_name)
+			fmt.Printf("  psql -U postgres -c \"CREATE DATABASE %s OWNER %s;\"\n", db_name, utils.GetEnvOrPanic("DB_USER"))
 			return nil // Don't fail, assume database exists
 		}
-		return fmt.Errorf("failed to create database %s: %w", dbName, createResult.Error)
+		return fmt.Errorf("failed to create database %s: %w", db_name, createResult.Error)
 	}
 
-	fmt.Printf("Database %s created successfully\n", dbName)
+	fmt.Printf("Database %s created successfully\n", db_name)
 	return nil
 }
 
