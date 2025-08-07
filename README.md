@@ -30,7 +30,7 @@ MQTT_PASSWORD=
 3. Start the backend server:
 ```bash
 cd backend
-go run cmd/server/main.go
+go run cmd/main.go cmd/api.go
 ```
 
 ## Running the simulator:

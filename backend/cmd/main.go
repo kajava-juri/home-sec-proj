@@ -39,6 +39,9 @@ func main() {
 	// Initialize Websocket
 	wsHub := websockets.StartWebsocketServer()
 
+	// Start API server
+	StartAPIServer()
+
 	// Get environment variables with defaults
 	broker := utils.GetEnv("MQTT_BROKER", "mqtt://localhost:1883")
 	clientID := utils.GetEnv("MQTT_CLIENT_ID", "home-security-backend")
@@ -67,15 +70,20 @@ func main() {
 
 	// Create and connect the client
 	client := mqtt.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		log.Fatalf("Failed to connect to MQTT broker: %v", token.Error())
+	if token := client.Connect(); token.WaitTimeout(5 * time.Second) {
+		if token.Error() != nil {
+			log.Fatalf("Failed to connect to MQTT broker: %v", token.Error())
+		} else {
+			log.Println("Connected to MQTT broker")
+			// Subscribe to sensor topics
+			topic := "sensor/#"
+			token := client.Subscribe(topic, 1, nil)
+			token.Wait()
+			log.Printf("Subscribed to topic: %s\n", topic)
+		}
+	} else {
+		log.Printf("Failed to connect to MQTT broker: timed out")
 	}
-
-	// Subscribe to sensor topics
-	topic := "sensor/#"
-	token := client.Subscribe(topic, 1, nil)
-	token.Wait()
-	log.Printf("Subscribed to topic: %s\n", topic)
 
 	// Keep the program running
 	select {}
