@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -167,7 +168,12 @@ func createMessageHandler(wsHub *websockets.WsHub) mqtt.MessageHandler {
 				return
 			}
 
-			wsHub.BroadcastMessage([]byte(reading.Message))
+			wsHub.BroadcastToTopic([]byte(reading.Message), "sensor/"+sensorId)
+			wsHub.BroadcastToTopic([]byte(reading.Message), "sensors")
+
+			if match, _ := regexp.MatchString(`sensor/\w*/alarm`, topic); match {
+				wsHub.BroadcastToTopic(payload, "alerts")
+			}
 
 		}
 	}

@@ -16,38 +16,22 @@ type Client struct {
 	// Channel to send messages to this client
 	send chan []byte
 
-	// Client type (e.g., "sensor", "dashboard")
-	clientType string
+	// Map of topics to clients subscribed to them
+	subscribedTopics map[string]bool
 }
 
 // NewClient creates a new client with the given connection
-func (h *WsHub) NewClient(conn *websocket.Conn, clientType string) *Client {
-	// TODO: implement
+func (h *WsHub) NewClient(conn *websocket.Conn) *Client {
 	return &Client{
 		hub:        h,
 		conn:       conn,
 		send:       make(chan []byte, 256), // Buffered channel for sending messages
-		clientType: clientType,
-	}
-}
-
-func (c *Client) handleMessage(message []byte) {
-	switch c.clientType {
-	case "sensor":
-		// Handle sensor data messages
-		log.Printf("Sensor message: %s", message)
-	case "dashboard":
-		// Handle dashboard messages
-		log.Printf("Dashboard message: %s", message)
-	default:
-		// Echo message back for testing
-		c.hub.broadcast <- message
+		subscribedTopics: make(map[string]bool),
 	}
 }
 
 // WriteMessages continuously writes messages from the send channel to the WebSocket
 func (c *Client) WriteMessages() {
-	// TODO: implement
 	for message := range c.send {
 		if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
 			log.Println("Error writing message:", err)
@@ -69,7 +53,6 @@ func (c *Client) SendMessage(message []byte) {
 
 // Close closes the client connection and cleans up
 func (c *Client) Close() {
-	// TODO: implement
 	if err := c.conn.Close(); err != nil {
 		log.Println("Error closing connection:", err)
 	}

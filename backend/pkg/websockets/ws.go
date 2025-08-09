@@ -26,7 +26,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	mutex.Lock()
-	client := hub.NewClient(conn, "test")
+	client := hub.NewClient(conn)
 	go client.WriteMessages() // Start the write goroutine
 	hub.register <- client    // Register with hub instead of direct map access
 	defer func() {
@@ -38,31 +38,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 
-		_, p, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Error reading message:", err)
-			// remove client from hub (requires some kind of identifier)
-			// mutex.Lock()
-			// delete(hub.clients, conn)
-			// mutex.Unlock()
+			hub.unregister <- client
 			break
 		}
+		log.Println("Received message:", string(msg))
 
-		log.Println("Received message:", string(p))
+		hub.handleClientMessage(client, msg)
 
-		hub.broadcast <- p // Broadcast message to all clients
-
-		// messageType, p, err := conn.ReadMessage()
-		// if err != nil {
-		// 	log.Println("Error reading message:", err)
-		// 	break
-		// }
-
-		// if err := conn.WriteMessage(messageType, p); err != nil {
-		// 	log.Println(err)
-		// 	break
-		// }
-
+		//hub.broadcast <- msg
 	}
 }
 
