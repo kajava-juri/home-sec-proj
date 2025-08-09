@@ -28,9 +28,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	mutex.Lock()
 	client := hub.NewClient(conn, "test")
 	go client.WriteMessages() // Start the write goroutine
-	hub.register <- client     // Register with hub instead of direct map access
+	hub.register <- client    // Register with hub instead of direct map access
 	defer func() {
-		hub.unregister <- client  // Unregister when function exits
+		hub.unregister <- client // Unregister when function exits
 	}()
 	mutex.Unlock()
 
@@ -71,11 +71,13 @@ func StartWebsocketServer() *WsHub {
 
 	go hub.Run() // Start the hub to handle broadcasting messages
 
-	http.HandleFunc("/ws", handler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ws", handler)
+
 	go func() {
 		log.Println("WebSocket server running on port", port)
-		if err := http.ListenAndServe(":"+port, nil); err != nil {
-			log.Println("Error starting server:", err)
+		if err := http.ListenAndServe(":"+port, mux); err != nil {
+			log.Println("Error starting WebSocket server:", err)
 			return
 		}
 	}()

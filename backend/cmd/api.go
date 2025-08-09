@@ -89,11 +89,12 @@ func getSensorReadings(w http.ResponseWriter, r *http.Request) {
 func StartAPIServer() {
 	port := utils.GetEnv("API_PORT", "8081")
 
+	mux := http.NewServeMux()
 	// Register routes
-	http.HandleFunc("/api/sensor-readings", getSensorReadings)
+	mux.HandleFunc("/api/sensor-readings", getSensorReadings)
 
 	// Health check endpoint
-	http.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
@@ -106,7 +107,7 @@ func StartAPIServer() {
 
 	// Start server in goroutine
 	go func() {
-		if err := http.ListenAndServe(":"+port, nil); err != nil {
+		if err := http.ListenAndServe(":"+port, mux); err != nil {
 			log.Printf("API server error: %v", err)
 		}
 	}()
