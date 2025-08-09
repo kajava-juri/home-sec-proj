@@ -1,6 +1,6 @@
 # Backend for Home Security Project
-It will serve a REST API and handle MQTT messages that the sensors will send.
-This repository also contains a simulator that sends fake data via MQTT.
+It will serve a REST API, Websocket server and handle MQTT messages that the sensors will send.
+This repository also contains a simulator that sends mock data via MQTT.
 
 ## Initial Setup
 1. Clone the repository:
