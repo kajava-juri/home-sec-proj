@@ -12,8 +12,28 @@ git clone TODO: Add repository URL
 cp default/.env.example backend/.env
 ```
 
+## System Dependancies
+### 1. PostgreSQL
+   
+   **Install configuration**
+   ``` bash
+   sudo apt install -y postgresql-common
+   sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+   ```
+
+   **Verify intallation**
+   ```
+   sudo service postgresql status
+   ```
+### 2. Go language
+
+   **you should follow the official documentation https://go.dev/doc/install**
+
 
 ## Running the backend
+```
+cd /backend/
+```
 1. Install dependencies:
 ```bash
 go mod tidy
