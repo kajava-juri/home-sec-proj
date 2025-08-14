@@ -61,25 +61,26 @@ func (m *MqttClient) Connect() error {
 	opts.OnConnectionLost = connectLostHandler
 
 	// Create and connect the client
-	client := mqtt.NewClient(opts)
-	if token := client.Connect(); token.WaitTimeout(5 * time.Second) {
-		if token.Error() != nil {
-			log.Printf("Failed to connect to MQTT broker: %v", token.Error())
-			log.Println("Application will continue running without MQTT connectivity")
-			return token.Error()
-		} else {
-			log.Println("Connected to MQTT broker")
-			// Subscribe to sensor topics
-			topic := "sensor/#"
-			token := client.Subscribe(topic, 1, nil)
-			token.Wait()
-			log.Printf("Subscribed to topic: %s\n", topic)
-		}
-	} else {
-		log.Printf("Failed to connect to MQTT broker: timed out")
-		log.Println("Application will continue running without MQTT connectivity")
-		return token.Error()
-	}
+	m.client = mqtt.NewClient(opts)
+	m.subscribeToTopics()
+	// if token := client.Connect(); token.WaitTimeout(5 * time.Second) {
+	// 	if token.Error() != nil {
+	// 		log.Printf("Failed to connect to MQTT broker: %v", token.Error())
+	// 		log.Println("Application will continue running without MQTT connectivity")
+	// 		return token.Error()
+	// 	} else {
+	// 		log.Println("Connected to MQTT broker")
+	// 		// Subscribe to sensor topics
+	// 		topic := "sensor/#"
+	// 		token := client.Subscribe(topic, 1, nil)
+	// 		token.Wait()
+	// 		log.Printf("Subscribed to topic: %s\n", topic)
+	// 	}
+	// } else {
+	// 	log.Printf("Failed to connect to MQTT broker: timed out")
+	// 	log.Println("Application will continue running without MQTT connectivity")
+	// 	return token.Error()
+	// }
 
 	return nil
 }
@@ -130,7 +131,7 @@ func createMessageHandler(wsHub *websockets.WsHub) mqtt.MessageHandler {
 		payload := msg.Payload()
 		log.Printf("Received message: %s from topic: %s\n", payload, topic)
 
-		if strings.HasPrefix(topic, "sensor/") && len(strings.Split(topic, "/")) >= 3 {
+		if strings.HasPrefix(topic, "sensor_hub/") && len(strings.Split(topic, "/")) >= 3 {
 			parts := strings.Split(topic, "/")
 			if len(parts) < 3 {
 				log.Println("Invalid topic format: " + topic)
@@ -144,15 +145,15 @@ func createMessageHandler(wsHub *websockets.WsHub) mqtt.MessageHandler {
 				return
 			}
 			// Get message timestamp
-			messageTimestamp := dat["timestamp"].(float64)
+			//messageTimestamp := dat["timestamp"].(float64)
 
 			// Create a new sensor reading
 			reading := &models.SensorReading{
-				SensorID:         sensorId,
-				Value:            0, // Assuming value is 0 for alarm messages
-				Message:          string(payload),
-				Timestamp:        time.Now(),
-				MessageTimestamp: time.Unix(int64(messageTimestamp), 0),
+				SensorID:  sensorId,
+				Value:     0, // Assuming value is 0 for alarm messages
+				Message:   string(payload),
+				Timestamp: time.Now(),
+				//MessageTimestamp: time.Unix(int64(messageTimestamp), 0),
 			}
 
 			if err := services.SensorReading.Create(reading); err != nil {
@@ -177,4 +178,27 @@ var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
 
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
 	log.Printf("Connect lost: %v", err)
+}
+
+func (m *MqttClient) subscribeToTopics() error {
+	if token := m.client.Connect(); token.WaitTimeout(5 * time.Second) {
+		if token.Error() != nil {
+			log.Printf("Failed to connect to MQTT broker: %v", token.Error())
+			log.Println("Application will continue running without MQTT connectivity")
+			return token.Error()
+		} else {
+			log.Println("Connected to MQTT broker")
+			// Subscribe to sensor topics
+			topic := "sensor_hub/#"
+			token := m.client.Subscribe(topic, 1, nil)
+			token.Wait()
+			log.Printf("Subscribed to topic: %s\n", topic)
+		}
+	} else {
+		log.Printf("Failed to connect to MQTT broker: timed out")
+		log.Println("Application will continue running without MQTT connectivity")
+		return token.Error()
+	}
+
+	return nil
 }

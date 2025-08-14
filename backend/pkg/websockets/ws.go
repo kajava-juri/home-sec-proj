@@ -40,7 +40,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("Error reading message:", err)
+			if !websocket.IsCloseError(err) {
+				log.Println("Error reading message:", err)
+			} else {
+				log.Printf("WebSocket connection closed: %s", conn.RemoteAddr())
+			}
 			hub.unregister <- client
 			break
 		}

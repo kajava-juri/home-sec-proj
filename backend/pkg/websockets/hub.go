@@ -86,6 +86,10 @@ func (h *WsHub) Run() {
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
+				// remove client from topic subscriptions
+				for topic := range client.subscribedTopics {
+					h.UnsubscribeClientFromTopics(client, []string{topic})
+				}
 				close(client.send) // Close the send channel to stop writing
 			}
 		// Grab the next message from the broadcast channel
