@@ -27,7 +27,9 @@ type MqttConfig struct {
 	ClientId string
 	Username string
 	Password string
-	CAfile   string
+	CAPath   string
+	CertPath string
+	KeyPath  string
 }
 
 func NewMqttClient(config MqttConfig, wsHub *websockets.WsHub) *MqttClient {
@@ -38,7 +40,7 @@ func NewMqttClient(config MqttConfig, wsHub *websockets.WsHub) *MqttClient {
 }
 
 func (m *MqttClient) Connect() error {
-	tlsconfig, err := m.NewTLSConfig(m.config.CAfile)
+	tlsconfig, err := m.NewTLSConfig(m.config.CAPath)
 	if err != nil {
 		return err
 	}
@@ -63,24 +65,6 @@ func (m *MqttClient) Connect() error {
 	// Create and connect the client
 	m.client = mqtt.NewClient(opts)
 	m.subscribeToTopics()
-	// if token := client.Connect(); token.WaitTimeout(5 * time.Second) {
-	// 	if token.Error() != nil {
-	// 		log.Printf("Failed to connect to MQTT broker: %v", token.Error())
-	// 		log.Println("Application will continue running without MQTT connectivity")
-	// 		return token.Error()
-	// 	} else {
-	// 		log.Println("Connected to MQTT broker")
-	// 		// Subscribe to sensor topics
-	// 		topic := "sensor/#"
-	// 		token := client.Subscribe(topic, 1, nil)
-	// 		token.Wait()
-	// 		log.Printf("Subscribed to topic: %s\n", topic)
-	// 	}
-	// } else {
-	// 	log.Printf("Failed to connect to MQTT broker: timed out")
-	// 	log.Println("Application will continue running without MQTT connectivity")
-	// 	return token.Error()
-	// }
 
 	return nil
 }
@@ -130,26 +114,43 @@ func createMessageHandler(wsHub *websockets.WsHub) mqtt.MessageHandler {
 		topic := msg.Topic()
 		payload := msg.Payload()
 		log.Printf("Received message: %s from topic: %s\n", payload, topic)
+		parts := strings.Split(topic, "/")
 
-		if strings.HasPrefix(topic, "sensor_hub/") && len(strings.Split(topic, "/")) >= 3 {
-			parts := strings.Split(topic, "/")
-			if len(parts) < 3 {
+		// /sensor_hub/<device>/<type>/<sensor_id>/{status|alarm}
+		if strings.HasPrefix(topic, "sensor_hub/") && len(parts) >= 4 {
+			if len(parts) < 4 {
 				log.Println("Invalid topic format: " + topic)
 				return
 			}
-			sensorId := parts[1]
 
 			var dat map[string]interface{}
 			if err := json.Unmarshal(payload, &dat); err != nil {
 				log.Printf("Error unmarshalling JSON: %v\n", err)
 				return
 			}
-			// Get message timestamp
-			//messageTimestamp := dat["timestamp"].(float64)
+
+			deviceId := parts[1]
+			foundDevice, err := services.Device.GetByID(deviceId)
+			if err != nil {
+				log.Printf("Error getting device: %v\n", err)
+				return
+			}
+			sensorType := parts[2]
+			sensorId := parts[3]
+			sensorQuery := models.Sensor{
+				Name: sensorId,
+				Type: sensorType,
+			}
+			sensor, err := services.Sensor.GetOrCreate(&sensorQuery)
+			if err != nil {
+				log.Printf("Error getting sensor: %v\n", err)
+				return
+			}
 
 			// Create a new sensor reading
 			reading := &models.SensorReading{
-				SensorID:  sensorId,
+				SensorID:  sensor.ID,
+				DeviceID:  foundDevice.ID,
 				Value:     0, // Assuming value is 0 for alarm messages
 				Message:   string(payload),
 				Timestamp: time.Now(),

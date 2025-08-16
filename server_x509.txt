@@ -1,0 +1,51 @@
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number:
+            07:9b:80:72:ea:3e:53:e7:99:06:b5:51:ee:45:ca:5a:4d:a0:18:88
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=EE, ST=Harjumaa, L=Tallinn, CN=MyCA, emailAddress=kajava.jyri@gmail.com
+        Validity
+            Not Before: Jul 19 12:34:48 2025 GMT
+            Not After : Jul 17 12:34:48 2035 GMT
+        Subject: C=EE, ST=Harjumaa, L=Tallinn, CN=localhost, emailAddress=kajava.jyri@gmail.com
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:a4:05:5b:e1:f0:61:d5:23:84:ec:71:8d:ca:9b:
+                    3a:0e:21:d8:02:08:8d:a1:d4:61:f3:e6:5b:8d:b3:
+                    11:a1:30:30:4e:d3:14:ec:c8:99:ab:aa:33:a8:00:
+                    ae:2c:a8:0e:50:6d:6b:3e:88:ab:b2:23:aa:6d:d0:
+                    97:59:66:14:ee:03:4a:62:c3:93:a7:90:b7:32:50:
+                    32:a8:96:ab:7a:8b:a8:b6:fa:56:2a:7e:10:36:84:
+                    c7:ea:a7:37:ab:a0:46:9c:a8:f5:da:f5:31:40:fa:
+                    cb:ea:16:bc:38:b0:c9:44:90:d4:49:6e:9e:08:99:
+                    0e:16:27:41:84:c1:d3:5f:32:e9:15:e6:82:82:76:
+                    08:44:5c:5f:f2:d0:fd:27:0e:87:8b:b4:71:10:1a:
+                    60:29:eb:49:00:2c:81:56:fd:83:29:98:be:12:b6:
+                    a7:0e:aa:d9:3d:b5:e6:de:8e:e8:7d:bf:1b:54:1b:
+                    68:d0:ec:ad:c6:35:e1:71:8d:5b:a0:75:39:8d:4e:
+                    21:ef:3f:6b:7b:d0:39:ab:55:17:5a:80:6b:ac:67:
+                    6a:41:0e:d7:2e:5d:f3:86:0b:29:5d:07:15:37:94:
+                    e3:5c:6c:74:1f:2e:bb:ec:44:99:68:83:54:13:91:
+                    d3:89:60:2e:0e:ad:ed:36:22:7d:a3:38:1b:5c:a6:
+                    5c:11
+                Exponent: 65537 (0x10001)
+    Signature Algorithm: sha256WithRSAEncryption
+    Signature Value:
+        9f:88:2a:b1:8b:42:4a:92:fb:c8:2b:75:7d:b5:a0:aa:ad:a3:
+        88:61:8f:3b:3c:cc:9a:80:9f:1e:43:eb:72:a8:8d:b2:55:24:
+        82:76:0f:fc:b2:5b:46:8a:6b:3d:26:87:2a:84:fb:a3:8f:d0:
+        cd:c4:60:77:21:f1:f9:97:a8:72:cc:05:2b:5a:8d:46:9a:ad:
+        80:32:71:39:64:8c:24:eb:f5:0e:28:5a:de:8b:2d:44:7d:61:
+        af:9d:b4:26:5e:d8:0c:b4:7d:d4:b1:43:53:a4:88:2d:31:75:
+        46:eb:22:bc:99:f4:a8:ee:a2:3f:e3:d9:cb:15:ca:e5:88:2d:
+        92:09:8c:5a:e5:0c:1a:b4:27:d9:92:42:27:8e:1e:95:cf:de:
+        b0:a0:35:e2:8d:f3:34:bc:d3:d6:a4:e5:b4:7e:91:82:ce:23:
+        e2:4d:87:61:5a:b8:c6:af:73:40:f4:d7:2c:6b:4b:9c:bb:07:
+        f8:d4:35:07:b6:a3:a5:96:d7:4b:a0:31:f4:9d:7f:46:5e:9f:
+        9c:22:e7:c4:93:cd:f3:90:36:64:63:98:2b:d4:0f:d5:68:ed:
+        02:82:ae:48:a1:d7:1c:4d:62:d8:7d:48:f7:fb:58:0d:74:2b:
+        ba:cb:07:05:0f:c3:da:45:be:a9:7d:88:ad:fa:de:9d:e1:9d:
+        ab:9a:92:6c

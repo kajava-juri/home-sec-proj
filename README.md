@@ -54,6 +54,16 @@ go build -o main cmd/main.go cmd/api.go
 ./main
 ```
 
+## Adding new devices
+
+To 'register' new device you have to run the sql manually. Later you will be able to do it via the API (authentication work in progress).
+If the device sends message with a new sensor then it will be created in the database, device however will not be created automatically.
+
+``` SQL
+INSERT INTO devices (name, location)
+VALUES ('pico_w_1', 'My home');
+```
+
 ## Running the simulator:
 
 This simulator sends fake sensor data to the MQTT broker. It can be used to test the backend without real sensors.

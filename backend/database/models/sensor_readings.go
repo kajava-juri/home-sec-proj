@@ -1,10 +1,17 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type SensorReading struct {
-	ID               int       `json:"id" db:"id"`
-	SensorID         string    `json:"sensor_id" db:"sensor_id"`
+	gorm.Model
+	SensorID         uint      `json:"sensor_id" db:"sensor_id"`
+	Sensor           Sensor    `gorm:"foreignKey:SensorID" json:"sensor"`
+	DeviceID         uint      `json:"device_id" db:"device_id"`
+	Device           Device    `gorm:"foreignKey:DeviceID" json:"device"`
 	Value            float64   `json:"value" db:"value"`
 	Message          string    `json:"message" db:"message"`
 	Timestamp        time.Time `json:"timestamp" db:"timestamp"`

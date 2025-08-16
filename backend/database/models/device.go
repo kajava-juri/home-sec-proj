@@ -4,10 +4,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type Sensor struct {
+type Device struct {
     gorm.Model
     Name        string    `json:"name" db:"name"`
-    Type        string    `json:"type" db:"type"`
     Description string    `json:"description" db:"description"`
     Location    string    `json:"location" db:"location"`
 }

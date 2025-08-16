@@ -85,7 +85,7 @@ func InitDb() error {
 	}
 	db = d
 
-	err = db.AutoMigrate(&models.Sensor{}, &models.User{}, &models.SensorReading{})
+	err = db.AutoMigrate(&models.Sensor{}, &models.User{}, &models.SensorReading{}, &models.Device{})
 	if err != nil {
 		fmt.Printf("Failed to auto migrate models: %v\n", err)
 		return err

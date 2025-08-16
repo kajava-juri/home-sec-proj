@@ -31,104 +31,27 @@ func main() {
 	// Start API server
 	StartAPIServer()
 
+	certs_folder := utils.GetEnv("MQTT_CERTS_PATH", "../certs")
+	cert_bundle_name := utils.GetEnv("MQTT_CERT_BUNDLE_NAME", "bundle.pem")
+
 	// MQTT client configuration
 	mqttConfig := mqttClient.MqttConfig{
 		Broker:   utils.GetEnv("MQTT_BROKER", "mqtt://localhost:1883"),
 		ClientId: utils.GetEnv("MQTT_CLIENT_ID", "home-security-backend"),
 		Username: utils.GetEnv("MQTT_USERNAME", ""),
 		Password: utils.GetEnv("MQTT_PASSWORD", ""),
-		CAfile:   utils.GetEnv("MQTT_CAFILE", "../certs/CAfile.pem"),
+		CAPath:   utils.GetEnv("MQTT_CAFILE", certs_folder+"/"+cert_bundle_name),
+		CertPath: utils.GetEnv("MQTT_CERT_PATH", certs_folder+"/client.crt"),
+		KeyPath:  utils.GetEnv("MQTT_KEY_PATH", certs_folder+"/client.key"),
 	}
+	log.Printf("Cert file paths: %s, %s, %s\n", mqttConfig.CAPath, mqttConfig.CertPath, mqttConfig.KeyPath)
 	mqttClient := mqttClient.NewMqttClient(mqttConfig, wsHub)
-	mqttClient.Connect()
+	err := mqttClient.Connect()
+	if err != nil {
+		log.Printf("Failed to connect to MQTT broker: %v", err)
+		log.Println("Application will continue running without MQTT connectivity")
+	}
 
 	// Keep the program running
 	select {}
 }
-
-// func NewTLSConfig() *tls.Config {
-// 	// Import trusted certificates from CAfile.pem.
-// 	// Alternatively, manually add CA certificates to
-// 	// default openssl CA bundle.
-// 	certpool := x509.NewCertPool()
-// 	pemCerts, err := os.ReadFile("../certs/CAfile.pem")
-// 	if err == nil {
-// 		certpool.AppendCertsFromPEM(pemCerts)
-// 	}
-
-// 	// Import client certificate/key pair
-// 	cert, err := tls.LoadX509KeyPair("../certs/client.crt", "../certs/client.key")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	// Just to print out the client certificate..
-// 	cert.Leaf, err = x509.ParseCertificate(cert.Certificate[0])
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	// Create tls.Config with desired tls properties
-// 	return &tls.Config{
-// 		// RootCAs = certs used to verify server cert.
-// 		RootCAs: certpool,
-// 		// ClientAuth = whether to request cert from server.
-// 		// Since the server is set up for SSL, this happens
-// 		// anyways.
-// 		ClientAuth: tls.NoClientCert,
-// 		// ClientCAs = certs used to validate client cert.
-// 		ClientCAs: nil,
-// 		// InsecureSkipVerify = verify that cert contents
-// 		// match server. IP matches what is in cert etc.
-// 		InsecureSkipVerify: true,
-// 		// Certificates = list of certs client sends to server.
-// 		Certificates: []tls.Certificate{cert},
-// 	}
-// }
-
-// func createMessageHandler(wsHub *websockets.WsHub) mqtt.MessageHandler {
-// 	return func(client mqtt.Client, msg mqtt.Message) {
-// 		topic := msg.Topic()
-// 		payload := msg.Payload()
-// 		log.Printf("Received message: %s from topic: %s\n", payload, topic)
-
-// 		if strings.HasPrefix(topic, "sensor/") && len(strings.Split(topic, "/")) >= 3 {
-// 			parts := strings.Split(topic, "/")
-// 			if len(parts) < 3 {
-// 				log.Println("Invalid topic format: " + topic)
-// 				return
-// 			}
-// 			sensorId := parts[1]
-
-// 			var dat map[string]interface{}
-// 			if err := json.Unmarshal(payload, &dat); err != nil {
-// 				log.Printf("Error unmarshalling JSON: %v\n", err)
-// 				return
-// 			}
-// 			// Get message timestamp
-// 			messageTimestamp := dat["timestamp"].(float64)
-
-// 			// Create a new sensor reading
-// 			reading := &models.SensorReading{
-// 				SensorID:         sensorId,
-// 				Value:            0, // Assuming value is 0 for alarm messages
-// 				Message:          string(payload),
-// 				Timestamp:        time.Now(),
-// 				MessageTimestamp: time.Unix(int64(messageTimestamp), 0),
-// 			}
-
-// 			if err := services.SensorReading.Create(reading); err != nil {
-// 				log.Printf("Failed to create sensor reading: %v\n", err)
-// 				return
-// 			}
-
-// 			wsHub.BroadcastToTopic([]byte(reading.Message), "sensor/"+sensorId)
-// 			wsHub.BroadcastToTopic([]byte(reading.Message), "sensors")
-
-// 			if match, _ := regexp.MatchString(`sensor/\w*/alarm`, topic); match {
-// 				wsHub.BroadcastToTopic(payload, "alerts")
-// 			}
-
-// 		}
-// 	}
-// }
