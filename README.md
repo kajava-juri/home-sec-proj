@@ -50,8 +50,8 @@ MQTT_PASSWORD=
 3. Start the backend server:
 ```bash
 cd backend
-go build -o main cmd/main.go cmd/api.go
-./main
+go build -o ./build/main cmd/main.go cmd/api.go
+./build/main
 ```
 
 ## Adding new devices
