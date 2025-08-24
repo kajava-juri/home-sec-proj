@@ -116,12 +116,8 @@ func createMessageHandler(wsHub *websockets.WsHub) mqtt.MessageHandler {
 		log.Printf("Received message: %s from topic: %s\n", payload, topic)
 		parts := strings.Split(topic, "/")
 
-		// /sensor_hub/<device>/<type>/<sensor_id>/{status|alarm}
-		if strings.HasPrefix(topic, "sensor_hub/") && len(parts) >= 4 {
-			if len(parts) < 4 {
-				log.Println("Invalid topic format: " + topic)
-				return
-			}
+		// /sensor_hub/<device>/<sensor_id>/{status|alarm}
+		if strings.HasPrefix(topic, "sensor_hub/") && parts[len(parts)-1] != "heartbeat" && len(parts) >= 3 {
 
 			var dat map[string]interface{}
 			if err := json.Unmarshal(payload, &dat); err != nil {
@@ -129,44 +125,46 @@ func createMessageHandler(wsHub *websockets.WsHub) mqtt.MessageHandler {
 				return
 			}
 
-			deviceId := parts[1]
-			foundDevice, err := services.Device.GetByID(deviceId)
-			if err != nil {
-				log.Printf("Error getting device: %v\n", err)
-				return
-			}
-			sensorType := parts[2]
-			sensorId := parts[3]
-			sensorQuery := models.Sensor{
-				Name: sensorId,
-				Type: sensorType,
-			}
-			sensor, err := services.Sensor.GetOrCreate(&sensorQuery)
-			if err != nil {
-				log.Printf("Error getting sensor: %v\n", err)
-				return
-			}
-
-			// Create a new sensor reading
-			reading := &models.SensorReading{
-				SensorID:  sensor.ID,
-				DeviceID:  foundDevice.ID,
-				Value:     0, // Assuming value is 0 for alarm messages
-				Message:   string(payload),
-				Timestamp: time.Now(),
-				//MessageTimestamp: time.Unix(int64(messageTimestamp), 0),
-			}
-
-			if err := services.SensorReading.Create(reading); err != nil {
-				log.Printf("Failed to create sensor reading: %v\n", err)
-				return
-			}
-
-			wsHub.BroadcastToTopic([]byte(reading.Message), "sensor/"+sensorId)
-			wsHub.BroadcastToTopic([]byte(reading.Message), "sensors")
-
-			if match, _ := regexp.MatchString(`sensor/\w*/alarm`, topic); match {
+			if match, _ := regexp.MatchString(`sensor_hub/\w*/alarm`, topic); match {
 				wsHub.BroadcastToTopic(payload, "alerts")
+			} else {
+			
+				deviceId := parts[1]
+				foundDevice, err := services.Device.GetByID(deviceId)
+				if err != nil {
+					log.Printf("Error getting device: %v\n", err)
+					return
+				}
+
+				sensorType := parts[2]
+				sensorId := parts[2]
+				sensorQuery := models.Sensor{
+					Name: sensorId,
+					Type: sensorType,
+				}
+				sensor, err := services.Sensor.GetOrCreate(&sensorQuery)
+				if err != nil {
+					log.Printf("Error getting sensor: %v\n", err)
+					return
+				}
+
+				// Create a new sensor reading
+				reading := &models.SensorReading{
+					SensorID:  sensor.ID,
+					DeviceID:  foundDevice.ID,
+					Value:     0, // Assuming value is 0 for alarm messages
+					Message:   string(payload),
+					Timestamp: time.Now(),
+					//MessageTimestamp: time.Unix(int64(messageTimestamp), 0),
+				}
+
+				if err := services.SensorReading.Create(reading); err != nil {
+					log.Printf("Failed to create sensor reading: %v\n", err)
+					return
+				}
+
+				wsHub.BroadcastToTopic([]byte(reading.Message), "sensor/"+sensorId)
+				wsHub.BroadcastToTopic([]byte(reading.Message), "sensors")
 			}
 
 		}

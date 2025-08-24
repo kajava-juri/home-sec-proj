@@ -1,24 +1,18 @@
-package api
+package handlers
 
 import (
+	"backend/database/services"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
-	"backend/database/services"
 )
 
-// PaginatedResponse represents a paginated API response
-type PaginatedResponse struct {
-	Data       interface{} `json:"data"`
-	Page       int         `json:"page"`
-	PageSize   int         `json:"page_size"`
-	TotalCount int64       `json:"total_count"`
-	TotalPages int         `json:"total_pages"`
-}
+type DeviceHandler struct{}
 
-// getSensorReadings handles GET /api/sensor-readings with pagination
-func GetSensorReadings(w http.ResponseWriter, r *http.Request) {
+var Device = DeviceHandler{}
+
+func (h DeviceHandler) GetDevices(w http.ResponseWriter, r *http.Request) {
 	// Set response headers
 	w.Header().Set("Content-Type", "application/json")
 
@@ -57,9 +51,9 @@ func GetSensorReadings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get paginated data from service
-	readings, totalCount, err := services.SensorReading.GetPaginated(page, pageSize)
+	devices, totalCount, err := services.Device.GetPaginated(page, pageSize)
 	if err != nil {
-		log.Printf("Error fetching sensor readings: %v", err)
+		log.Printf("Error fetching devices: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
 		return
@@ -70,7 +64,7 @@ func GetSensorReadings(w http.ResponseWriter, r *http.Request) {
 
 	// Create response
 	response := PaginatedResponse{
-		Data:       readings,
+		Data:       devices,
 		Page:       page,
 		PageSize:   pageSize,
 		TotalCount: totalCount,
