@@ -134,11 +134,18 @@ I followed this guide from Medium: [[Tutorial] How to Set Up a Mosquitto MQTT Br
 ## Database
 This project uses PostgreSQL as the database. Ensure you have PostgreSQL installed and running.
 
-## Database initialization
+### Database initialization
 Database is initialized simply by running the go application. It will create the necessary tables if they do not exist.
 
 Additionally you can use the command line argument `-clean` to recreate the database. It will populate the devices table with a sample device.
 In order for any sensor messages to be processed the device must exist in the database. The device is name is the second part of the MQTT topic. For example for the topic `sensor_hub/pico_w_1/temperature` the device name is `pico_w_1`.
+
+### Table structure
+The database has the following tables:
+- devices - registered devices and their status
+- sensors - type of sensors under a device
+- sensor_data - sensor readings, essentially all messages whose topic matches `sensor_hub/{device}/{sensor_type}/{sensor_id}/?{optional_sensor_events}?`
+- alarms - alarm events, device specific, topic matches `sensor_hub/{device}/alarm/{event_type}`
 
 ## Install migration tool
 
