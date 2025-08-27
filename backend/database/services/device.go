@@ -68,3 +68,11 @@ func (s DeviceService) GetPaginated(page, pageSize int) ([]models.Device, int64,
 
 	return devices, totalCount, nil
 }
+
+func (s DeviceService) Update(device *models.Device) error {
+	res := postgres.DB().Save(device).Error
+	if res != nil {
+		return fmt.Errorf("failed to update device: %w", res)
+	}
+	return nil
+}

@@ -58,6 +58,7 @@ func createDatabaseIfNotExists() error {
 	// if clean argument was set, drop the database
 	if utils.CmdArgs.CleanDb && exists {
 		log.Printf("Dropping database %s\n", db_name)
+		// Credit to Leeladharan Achar https://stackoverflow.com/questions/664091/drop-a-database-being-accessed-by-another-users/664119
 		stopSessions := fmt.Sprintf(`
 		SELECT pg_terminate_backend(pg_stat_activity.pid)
 		FROM pg_stat_activity
@@ -111,8 +112,16 @@ func InitDb() error {
 		return err
 	}
 
-	// populate initial data
-	db.Create(&models.Device{Name: "pico_w_1", Description: "Raspberry Pi Pico W", Location: "Demon House"})
+	// populate data if not exists
+	var devExists bool
+	result := db.Raw("SELECT EXISTS(SELECT id FROM devices LIMIT 1)").Scan(&devExists)
+	if result.Error != nil {
+		return fmt.Errorf("failed to check if database exists: %w", result.Error)
+	}
+	if !devExists {
+		// populate initial data
+		db.Create(&models.Device{Name: "pico_w_1", Description: "Raspberry Pi Pico W", Location: "Demon House"})
+	}
 
 	fmt.Println("Connected to PostgreSQL")
 	return nil

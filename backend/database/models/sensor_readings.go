@@ -12,7 +12,8 @@ type SensorReading struct {
 	Sensor           Sensor    `gorm:"foreignKey:SensorID" json:"sensor"`
 	DeviceID         uint      `json:"device_id" db:"device_id"`
 	Device           Device    `gorm:"foreignKey:DeviceID" json:"device"`
-	Value            float64   `json:"value" db:"value"`
+	Value            string    `json:"value" db:"value"`
+	Topic            string    `json:"topic" db:"topic"`
 	Message          string    `json:"message" db:"message"`
 	Timestamp        time.Time `json:"timestamp" db:"timestamp"`
 	MessageTimestamp time.Time `json:"message_timestamp" db:"message_timestamp"`
