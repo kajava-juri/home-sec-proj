@@ -3,10 +3,7 @@ It will serve a REST API, Websocket server and handle MQTT messages that the sen
 This repository also contains a simulator that sends mock data via MQTT.
 
 ## Initial Setup
-1. Clone the repository:
-```bash
-git clone TODO: Add repository URL
-```
+1. Clone the repository
 2. Copy the example environment file:
 ```bash
 cp default/.env.example backend/.env
@@ -54,6 +51,48 @@ go build -o ./build/main cmd/main.go cmd/api.go
 ./build/main
 ```
 
+## Usage
+
+This server listens to MQTT messages from the sensors and saves them to the database.
+The backend exposes an unsecured REST API for requesting device status and sensor data saved in the PostgreSQL database.
+It offers real-time updates via WebSockets (also unsecured) for connected clients. The websockets have a subscribe/unsubscribe feature described below.
+
+**Note that this is meant to be used in a trusted network environment.**
+
+### WebSocket API
+
+**TODO:** add websocket command to retrieve existing topics
+
+**Subscribing**
+
+To subscribe to a topic, send a WebSocket message with the following JSON payload:
+
+**TODO:** add pattern matching and commands to retrieve subscribed topics
+
+```json
+{
+  "action": "subscribe",
+  "topic": [
+   "sensors",
+   "sensors/pico_w_1"
+   ]
+}
+```
+
+**Unsubscribing**
+
+To unsubscribe from a topic, send a WebSocket message with the following JSON payload:
+
+```json
+{
+  "action": "unsubscribe",
+  "topic": [
+   "sensors",
+   "sensors/pico_w_1"
+   ]
+}
+```
+
 ## Adding new devices
 
 To 'register' new device you have to run the sql manually. Later you will be able to do it via the API (authentication work in progress).
@@ -95,12 +134,20 @@ I followed this guide from Medium: [[Tutorial] How to Set Up a Mosquitto MQTT Br
 ## Database
 This project uses PostgreSQL as the database. Ensure you have PostgreSQL installed and running.
 
+## Database initialization
+Database is initialized simply by running the go application. It will create the necessary tables if they do not exist.
+
+Additionally you can use the command line argument `-clean` to recreate the database. It will populate the devices table with a sample device.
+In order for any sensor messages to be processed the device must exist in the database. The device is name is the second part of the MQTT topic. For example for the topic `sensor_hub/pico_w_1/temperature` the device name is `pico_w_1`.
+
 ## Install migration tool
+
+Migration tools should be used on an established database to manage schema changes and versioning. Runnin schema changes is discouraged on a production database.
+
 ```bash
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 ```
-## Create the database
-...
+
 
 ## Certificates
 
