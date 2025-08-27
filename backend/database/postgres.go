@@ -49,9 +49,29 @@ func createDatabaseIfNotExists() error {
 		return fmt.Errorf("failed to check if database exists: %w", result.Error)
 	}
 
-	if exists {
+	// If no clean argument was set, return
+	if !utils.CmdArgs.CleanDb && exists {
 		log.Printf("Database %s already exists\n", db_name)
 		return nil
+	}
+
+	// if clean argument was set, drop the database
+	if utils.CmdArgs.CleanDb && exists {
+		log.Printf("Dropping database %s\n", db_name)
+		stopSessions := fmt.Sprintf(`
+		SELECT pg_terminate_backend(pg_stat_activity.pid)
+		FROM pg_stat_activity
+		WHERE pg_stat_activity.datname = '%s'
+		AND pid <> pg_backend_pid();
+		`, db_name)
+		if err := db.Exec(stopSessions).Error; err != nil {
+			return fmt.Errorf("failed to drop database %s: %w", db_name, err)
+		}
+
+		dropQuery := fmt.Sprintf("DROP DATABASE %s", db_name)
+		if err := db.Exec(dropQuery).Error; err != nil {
+			return fmt.Errorf("failed to drop database %s: %w", db_name, err)
+		}
 	}
 
 	// Create database if it doesn't exist
@@ -85,11 +105,14 @@ func InitDb() error {
 	}
 	db = d
 
-	err = db.AutoMigrate(&models.Sensor{}, &models.User{}, &models.SensorReading{}, &models.Device{})
+	err = db.AutoMigrate(&models.Sensor{}, &models.User{}, &models.SensorReading{}, &models.Device{}, &models.Alarm{})
 	if err != nil {
 		fmt.Printf("Failed to auto migrate models: %v\n", err)
 		return err
 	}
+
+	// populate initial data
+	db.Create(&models.Device{Name: "pico_w_1", Description: "Raspberry Pi Pico W", Location: "Demon House"})
 
 	fmt.Println("Connected to PostgreSQL")
 	return nil

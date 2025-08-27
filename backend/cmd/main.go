@@ -16,7 +16,14 @@ import (
 // 	log.Printf("Connect lost: %v", err)
 // }
 
+type CommandArguments struct {
+	CleanDb bool
+}
+
+var CmdArgs = CommandArguments{}
+
 func main() {
+	utils.ParseFlags()
 	// Load environment variables from .env file
 	utils.LoadEnv()
 
